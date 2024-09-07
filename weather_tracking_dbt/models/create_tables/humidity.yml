@@ -1,0 +1,47 @@
+
+variables:
+  table: &table "humidity"
+
+models:
+  - name: *table
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: humidity_id
+        data_type: text
+        constraints:
+          - type: primary_key 
+          - type: not_null
+          - type: unique
+      - name: humidity_value
+        data_type: numeric(10,2)
+        constraints:
+        - type: not_null
+      - name: humidity_unit
+        data_type: text
+        constraints:
+         - type: not_null
+
+
+sources:
+  - name: warehouse # This is the schema name!
+    description: This is a replica of the Postgres schema used by our app
+    tables:
+      - name: *table
+        description: This table contains measurements of humidity.
+        columns:
+          - name: humidity_id
+            description: The primary key identifier for each humidity measurement
+            tests:
+              - unique
+              - not_null
+          - name: humidity_value
+            description: The recorded value of the humidity measurement.
+            tests:
+                - not_null
+          - name: humidity_unit
+            description: The unit of measurement for the humidity value, likely percentage (%).
+            tests:
+                - not_null

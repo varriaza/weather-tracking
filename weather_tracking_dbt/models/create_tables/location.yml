@@ -1,0 +1,63 @@
+
+variables:
+  table: &table "location"
+
+models:
+  - name: *table
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: location_id
+        data_type: text
+        constraints:
+          - type: primary_key 
+          - type: not_null
+          - type: unique
+      - name: location_type
+        data_type: text
+        constraints:
+        - type: not_null
+      - name: coordinates
+        data_type: text
+        constraints:
+        - type: not_null
+      - name: location_elevation_value
+        data_type: numeric(10,4)
+        constraints:
+        - type: not_null
+      - name: location_elevation_units
+        data_type: text
+        constraints:
+         - type: not_null
+
+
+sources:
+  - name: warehouse # This is the schema name!
+    description: This is a replica of the Postgres schema used by our app
+    tables:
+      - name: *table
+        description: This table contains measurements of location.
+        columns:
+          - name: location_id
+            description: The primary key identifier for each location measurement
+            tests:
+              - unique
+              - not_null
+          - name: location_type
+            description: The geometry of the location coordinates (Polygon and etc)
+            tests:
+                - not_null
+          - name: coordinates
+            description: A list of list of coordinates [[1,2], [3,4], [5,6]].
+            tests:
+                - not_null
+          - name: location_elevation_value
+            description: How high above sea level.
+            tests:
+                - not_null
+          - name: location_elevation_units
+            description: The units for how high above sea level.
+            tests:
+                - not_null

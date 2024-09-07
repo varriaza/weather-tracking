@@ -1,0 +1,54 @@
+
+variables:
+  table: &table "wind"
+
+models:
+  - name: *table
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: wind_id
+        data_type: text
+        constraints:
+          - type: primary_key 
+          - type: not_null
+          - type: unique
+      - name: wind_speed
+        data_type: numeric(10,2)
+        constraints:
+         - type: not_null
+      - name: wind_unit
+        data_type: text
+        constraints:
+        - type: not_null
+      - name: wind_direction
+        data_type: text
+        constraints:
+        - type: not_null
+
+sources:
+  - name: warehouse # This is the schema name!
+    description: This is a replica of the Postgres schema used by our app
+    tables:
+      - name: *table
+        description: This table contains measurements of wind.
+        columns:
+          - name: wind_id
+            description: The primary key identifier for each wind measurement
+            tests:
+              - unique
+              - not_null
+          - name: wind_speed
+            description: The recorded value of the wind measurement.
+            tests:
+                - not_null
+          - name: wind_unit
+            description: The unit of measurement for the wind value, likely mph.
+            tests:
+                - not_null
+          - name: wind_direction
+            description: The direction of the wind (N, E, SE, NW).
+            tests:
+                - not_null

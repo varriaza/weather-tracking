@@ -1,0 +1,62 @@
+
+variables:
+  table: &table "datetime"
+
+models:
+  - name: *table
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: datetime_id
+        data_type: text
+        constraints:
+          - type: primary_key 
+          - type: not_null
+          - type: unique
+      - name: start_time
+        data_type: time
+        constraints:
+        - type: not_null
+      - name: end_time
+        data_type: time
+        constraints:
+         - type: not_null
+      - name: date
+        data_type: date
+        constraints:
+         - type: not_null
+      - name: is_daytime
+        data_type: boolean
+        constraints:
+         - type: not_null
+
+sources:
+  - name: warehouse # This is the schema name!
+    description: This is a replica of the Postgres schema used by our app
+    tables:
+      - name: *table
+        description: This table contains measurements of datetime.
+        columns:
+          - name: datetime_id
+            description: The primary key identifier for each datetime measurement
+            tests:
+              - unique
+              - not_null
+          - name: start_time
+            description: The starting time the data was captured.
+            tests:
+                - not_null
+          - name: end_time
+            description: The end time the data was captured.
+            tests:
+                - not_null
+          - name: date
+            description: The date the data was captured.
+            tests:
+                - not_null
+          - name: is_daytime
+            description: Did the time fall during daylight(?) hours (Need to double check this).
+            tests:
+                - not_null

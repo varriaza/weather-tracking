@@ -1,0 +1,47 @@
+
+variables:
+  table: &table "dewpoint"
+
+models:
+  - name: *table
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: dewpoint_id
+        data_type: text
+        constraints:
+          - type: primary_key 
+          - type: not_null
+          - type: unique
+      - name: dewpoint_value
+        data_type: numeric(10,2)
+        constraints:
+        - type: not_null
+      - name: dewpoint_unit
+        data_type: text
+        constraints:
+         - type: not_null
+
+
+sources:
+  - name: warehouse # This is the schema name!
+    description: This is a replica of the Postgres schema used by our app
+    tables:
+      - name: *table
+        description: This table contains measurements of dewpoint.
+        columns:
+          - name: dewpoint_id
+            description: The primary key identifier for each dewpoint measurement
+            tests:
+              - unique
+              - not_null
+          - name: dewpoint_value
+            description: The recorded value of the dewpoint measurement.
+            tests:
+                - not_null
+          - name: dewpoint_unit
+            description: The unit of measurement for the dewpoint value, likely "degC".
+            tests:
+                - not_null

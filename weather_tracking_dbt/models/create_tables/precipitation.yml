@@ -1,0 +1,47 @@
+
+variables:
+  table: &table "precipitation"
+
+models:
+  - name: *table
+    config:
+      materialized: table
+      contract:
+        enforced: true
+    columns:
+      - name: precipitation_id
+        data_type: text
+        constraints:
+          - type: primary_key 
+          - type: not_null
+          - type: unique
+      - name: probability_of_precip_value
+        data_type: numeric(10,2)
+        constraints:
+        - type: not_null
+      - name: probability_of_precip_unit
+        data_type: text
+        constraints:
+         - type: not_null
+
+
+sources:
+  - name: warehouse # This is the schema name!
+    description: This is a replica of the Postgres schema used by our app
+    tables:
+      - name: *table
+        description: This table contains measurements of precipitation.
+        columns:
+          - name: precipitation_id
+            description: The primary key identifier for each precipitation measurement
+            tests:
+              - unique
+              - not_null
+          - name: probability_of_precip_value
+            description: The recorded value of the probability of precipitation measurement.
+            tests:
+                - not_null
+          - name: probability_of_precip_unit
+            description: The unit of measurement for the probability of precipitation value, likely percentage (%).
+            tests:
+                - not_null
