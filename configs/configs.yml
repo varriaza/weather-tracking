@@ -1,0 +1,15 @@
+# Uses format from this library to read in env varaibles:
+# https://mariakaranasou.com/pyaml_env/
+
+# Define these console variables before you run this
+lat: !ENV ${lat}
+long: !ENV ${long}
+# Set the kind of gridpoint query you want to run
+gridpoints_office: TOP
+
+grid_x: !ENV ${grid_x}
+grid_y: !ENV ${grid_y}
+
+points_API_url: https://api.weather.gov/points/{lat},{long}
+gridpoints_API_url: https://api.weather.gov/gridpoints/{office}/{grid_x},{grid_y}/forecast
+

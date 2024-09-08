@@ -164,6 +164,9 @@ cython_debug/
 # Local misc files and directories
 local_only/
 
+# ignore setup env file
+*/setup_env*
+
 # venv
 weather-venv/
 
