@@ -16,15 +16,11 @@ models:
           - type: not_null
           - type: unique
       - name: start_time
-        data_type: time
+        data_type: timestamp
         constraints:
         - type: not_null
       - name: end_time
-        data_type: time
-        constraints:
-         - type: not_null
-      - name: date
-        data_type: date
+        data_type: timestamp
         constraints:
          - type: not_null
       - name: is_daytime
@@ -45,15 +41,11 @@ sources:
               - unique
               - not_null
           - name: start_time
-            description: The starting time the data was captured.
+            description: The starting datetime the data was captured.
             tests:
                 - not_null
           - name: end_time
-            description: The end time the data was captured.
-            tests:
-                - not_null
-          - name: date
-            description: The date the data was captured.
+            description: The end datetime the data was captured.
             tests:
                 - not_null
           - name: is_daytime

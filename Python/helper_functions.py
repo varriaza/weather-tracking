@@ -1,6 +1,9 @@
 import logging
 import os
 import yaml
+from sqlalchemy import create_engine, Engine
+from sqlalchemy.orm import Session
+from typing import Dict, Any
 
 def setup_env(input_file: str):
     try:
@@ -14,17 +17,17 @@ def setup_env(input_file: str):
         print("setup_env.yml file does not exist, moving on without it.")
 
 
-def setup_logs() -> logging.Logger:
+def setup_logs(log_name: str) -> logging.Logger:
     # Create the directory if it doesn't exist
     log_dir = 'logs'
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
     # Define the log file path and name
-    log_filename = os.path.join(log_dir, 'query_api.log')
+    log_filename = os.path.join(log_dir, f'{log_name}.log')
 
     # Create a custom logger
-    logger = logging.getLogger('query_api')
+    logger = logging.getLogger(log_name)
     logger.setLevel(logging.DEBUG)
 
     # Create a formatter
@@ -38,3 +41,19 @@ def setup_logs() -> logging.Logger:
     logger.addHandler(fh)
     logger.info('------------------ New run starting ------------------')
     return logger
+
+
+def connect_to_database(configs: Dict[str, str]) -> Engine:
+    connection_string = configs["db_uri"].format(
+    db_username=configs["db_username"],
+    db_password=configs["db_password"],
+    db_host=configs["db_host"],
+    db_name=configs["db_name"]
+)
+    engine = create_engine(connection_string, connect_args={'options': '-csearch_path={}'.format(configs["db_schema"])})
+    return engine
+
+def write_objects_to_database(engine: Engine, objects: list[Any]) -> None:
+    with Session(engine) as session:
+        session.add(objects)
+        session.commit()

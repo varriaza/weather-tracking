@@ -4,7 +4,6 @@
     table + '_id',
     'start_time',
     'end_time',
-    'date',
     'is_daytime'
 ] %}
 
@@ -12,9 +11,8 @@
 
 {% set column_types = {
     table + '_id': 'text',
-    'start_time': 'time',
-    'end_time': 'time',
-    'date': 'date',
+    'start_time': 'timestamp',
+    'end_time': 'timestamp',
     'is_daytime': 'boolean'
 } %}
 

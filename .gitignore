@@ -173,3 +173,4 @@ weather-venv/
 # logs
 *.log
 
+.vscode
