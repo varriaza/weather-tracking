@@ -72,6 +72,13 @@ response = requests.get(gridpoints_url)
 if response.status_code == 200:
     # Get the data as a dictionary
     data = json.loads(response.text)
+    
+    # Read in DB configs yml file
+    db_config_path = "configs/db_configs.yml"
+    db_configs = parse_config(db_config_path)
+    # Session add and commit to save the new data
+    engine = connect_to_database(db_configs)
+    # write_objects_to_database(engine, all_objects)
 
     # Create list to hold all of the objects that will be added to the database
     all_objects = []
@@ -81,45 +88,46 @@ if response.status_code == 200:
         json_data=data,
         query_type=configs["forecast_period"],
     )
-    log.info(f"created query object")
+    # Save the query_id to a variable for later use
+    query_id = query.query_id
+    write_objects_to_database(engine, query)
+    
+    # log.info(f"created query object")
 
     # loop over all periods in the response data
     num_period = 0
-    
-    # TODO: Remove this once the API 500 error is fixed
-    log.info(f"period type: {type(data["properties"]["periods"][0][0])}")
 
-    # Note: "periods" is a list of tuples
-    for _ in data["properties"]["periods"][0]:
-        log.debug(f"num_period: {num_period}")
-        all_objects.append(create_forecast_time(data, num_period, query.query_id))
-        log.debug("created forecast_time object")
+    # Note: "periods" is a list of dicts
+    for _ in data["properties"]["periods"]:
+        # log.debug(f"num_period: {num_period}")
+        
+        write_objects_to_database(engine, create_forecast_time(data, num_period, query_id))
+        # log.debug("created forecast_time object")
 
-        all_objects.append(create_location(data, num_period, query.query_id))
-        log.debug("created location object")
+        write_objects_to_database(engine, create_location(data, query_id))
+        # log.debug("created location object")
 
-        all_objects.append(create_precipitation(data, num_period, query.query_id))
-        log.debug("created precipitation object")
+        write_objects_to_database(engine, create_precipitation(data, num_period, query_id))
+        # log.debug("created precipitation object")
 
-        all_objects.append(create_temperature(data, num_period, query.query_id))
-        log.debug("created temperature object")
+        write_objects_to_database(engine, create_temperature(data, num_period, query_id))
+        # log.debug("created temperature object")
 
-        all_objects.append(create_wind(data, num_period, query.query_id))
-        log.debug("created wind object")
+        write_objects_to_database(engine, create_wind(data, num_period, query_id))
+        # log.debug("created wind object")
 
         # If we are in the hourly forecast add Dewpoint and Humidity to the database
         if configs["forecast_period"] == "hourly":
-            all_objects.append(create_dewpoint(data, num_period, query.query_id))
-            log.debug("created dewpoint object")
+            write_objects_to_database(engine, create_dewpoint(data, num_period, query_id))
+            # log.debug("created dewpoint object")
 
-            all_objects.append(create_humidity(data, num_period, query.query_id))
-            log.debug("created humidity object")
+            write_objects_to_database(engine, create_humidity(data, num_period, query_id))
+            # log.debug("created humidity object")
+        
+        # log.debug(f"all_objects created for period: {all_objects}")
+
         # Go to the next period
         num_period += 1
-
-    # Session add and commit to save the new data
-    engine = connect_to_database(configs)
-    write_objects_to_database(engine, all_objects)
 
 else:
     log.error(f"Failed to get weather data. Status code: {response.status_code}")

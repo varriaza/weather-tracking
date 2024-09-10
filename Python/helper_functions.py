@@ -4,6 +4,7 @@ import yaml
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 from typing import Dict, Any
+from create_forecast_objects import create_table_load_tracker
 
 def setup_env(input_file: str):
     try:
@@ -53,7 +54,22 @@ def connect_to_database(configs: Dict[str, str]) -> Engine:
     engine = create_engine(connection_string, connect_args={'options': '-csearch_path={}'.format(configs["db_schema"])})
     return engine
 
-def write_objects_to_database(engine: Engine, objects: list[Any]) -> None:
+def write_objects_to_database(engine: Engine, object: Any) -> None:
+    """Write an object to the database and track this change by updating the table load tracker.
+    engine: The database engine to use.
+    object: The object to write to the database. Should be from "create_forecast_objects".
+    """
+    # See if the object has a query_id
+    try:
+        query_id = object.query_id
+    except AttributeError:
+        query_id = None
+    
+    table_load_tracker_object = create_table_load_tracker(
+        table_name=object.__tablename__,
+        query_id=query_id,
+    )
+
     with Session(engine) as session:
-        session.add(objects)
+        session.add_all([object, table_load_tracker_object])
         session.commit()

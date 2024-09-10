@@ -5,8 +5,7 @@ db_host: localhost
 db_name: weather_db
 db_uri: postgresql://{db_username}:{db_password}@{db_host}/{db_name}
 
-db_schema: test
-# db_schema: warehouse
+db_schema: warehouse
 
 # Drop all tables when running the create_tables.py
 # The script will ask the user for confirmtion before proceding.

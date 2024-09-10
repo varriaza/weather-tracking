@@ -1,6 +1,7 @@
 from typing import Any, Dict
-from db_models import Base, Query, ForecastTime, Dewpoint, Humidity, Location, Precipitation, Temperature, Wind
+from db_models import Base, Query, TableLoadTracker, ForecastTime, Dewpoint, Humidity, Location, Precipitation, Temperature, Wind
 from uuid import uuid4
+from datetime import datetime
 
 def create_query(json_data: Dict[str, Any], query_type: str) -> Query:
     if query_type not in ["hourly", "daily"]:
@@ -12,6 +13,15 @@ def create_query(json_data: Dict[str, Any], query_type: str) -> Query:
         query_type=query_type,
     )
     return query
+
+def create_table_load_tracker(table_name: str, query_id: str) -> Base:
+    table_load_tracker = TableLoadTracker(
+        load_id=uuid4(),
+        table_name=table_name,
+        load_time=datetime.now(),
+        query_id=query_id
+    )
+    return table_load_tracker
 
 def create_forecast_time(json_data: Dict[str, Any], num_period: int, query_id: uuid4) -> ForecastTime:
     forecast_time_object = ForecastTime(
@@ -57,7 +67,7 @@ def create_location(json_data: Dict[str, Any], query_id: uuid4) -> Location:
         geometry_type=json_data["geometry"]["type"],
         coordinates=coordinates_string,
         elevation_value=json_data["properties"]["elevation"]["value"],
-        elevation_unit=json_data["properties"]["elevation"]["unitCode"]
+        elevation_units=json_data["properties"]["elevation"]["unitCode"]
     )
     return location_object
 
@@ -75,7 +85,7 @@ def create_temperature(json_data: Dict[str, Any], num_period: int, query_id: uui
         temperature_id=uuid4(),
         query_id=query_id,
         temperature_value=json_data["properties"]["periods"][num_period]["temperature"],
-        temperature_unit=json_data["properties"]["periods"][num_period]["temperatureUnit"],
+        temperature_units=json_data["properties"]["periods"][num_period]["temperatureUnit"],
         temperature_trend=json_data["properties"]["periods"][num_period]["temperatureTrend"]
     )
     return temperature_object
@@ -85,12 +95,14 @@ def create_wind(json_data: Dict[str, Any], num_period: int, query_id: uuid4) -> 
     # Example: '10 mph' is split into ['10', 'mph'].
     wind_data: str = json_data["properties"]["periods"][num_period]['windSpeed']
     wind_data_list = wind_data.split(" ")
+    if len(wind_data_list) != 2:
+        raise ValueError(f"Invalid wind speed format. Expected 2 parts: speed and units. Got {wind_data}")
 
     wind_object = Wind(
         wind_id=uuid4(),
         query_id=query_id,
         wind_speed=wind_data_list[0],
-        wind_units=wind_data_list[1:], # Get all but the first element of List
+        wind_units=wind_data_list[1],
         wind_direction=json_data["properties"]["periods"][num_period]['windDirection'],
     )
     return wind_object

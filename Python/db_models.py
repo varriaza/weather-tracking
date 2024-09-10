@@ -17,6 +17,17 @@ class Query(Base):
     def __repr__(self):
         return f"query(query_id={self.query_id!r}, query_time={self.query_time!r}, query_type={self.query_type!r})"
 
+class TableLoadTracker(Base):
+    __tablename__ = "table_load_tracker"
+
+    load_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    table_name: Mapped[str] = mapped_column(Text)
+    load_time: Mapped[datetime] = mapped_column(TIMESTAMP)
+    query_id: Mapped[str] = mapped_column(ForeignKey("query.query_id"), nullable=True)
+
+    def __repr__(self):
+        return f"TableLoadTracker(load_id={self.load_id!r}, table_name={self.table_name!r}, load_time={self.load_time!r}, query_id={self.query_id!r})"
+
 class ForecastTime(Base):
     __tablename__ = "forecast_time"
 
