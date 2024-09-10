@@ -25,7 +25,7 @@ try:
     if configs["drop_all_tables"]:
         log.warning("drop all variable is enabled!")
         print("WARNING: drop all variable is enabled!")
-        sleep(5) # sleep for 5 seconds to avoid accidental data loss
+        sleep(5)  # sleep for 5 seconds to avoid accidental data loss
         input = input("Are you sure you want to drop all tables? (y/n): ")
         if input == "y":
             log.critical("Dropping ALL tables!")
@@ -33,7 +33,7 @@ try:
         else:
             log.warning("Dropping all tables canceled.")
     # This will create all tables in the database if they don't already exist
-    Base.metadata.create_all(engine)  
+    Base.metadata.create_all(engine)
     log.info("All database tables created")
 except Exception as e:
     log.error(f"Error creating database tables: {e}")
